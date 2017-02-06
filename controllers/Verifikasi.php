@@ -36,6 +36,7 @@ public function __construct(){
 
 	public function approval_usul(){
 		 $id 			=  $_POST['id'];
+		 $reason_apv    =  $_POST['reason'];
 		 $aprv 			= 2;
 		 $sesinya 		= $this->db->get_where('tview_trans_pelatihan', array('id_tp' => $id))->row();
 		 $nip 			= $sesinya->nip;
@@ -69,7 +70,7 @@ public function __construct(){
 			{
 				// $status = array("STATUS"=>"true"); 
 				// echo json_encode ($status) ;
-				$this->verifikasi_m->approved_usul($id,$aprv);
+				$this->verifikasi_m->approved_usul($id,$aprv,$reason_apv);
 				$this->setemail2($id);
 			}
 			

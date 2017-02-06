@@ -175,7 +175,7 @@ class Training extends CI_Controller{
 
 	public function setemail4($id)
 			{
-			 $sesinya = $sesinya = $this->db->get_where('tview_trans_pelatihan', array('id_tp' => $id))->row();
+			 $sesinya =  $this->db->get_where('tview_trans_pelatihan', array('id_tp' => $id))->row();
 		if ($sesinya)
 			{
 				
@@ -251,6 +251,146 @@ class Training extends CI_Controller{
                           }
                       }
 			    }	
+
+
+	public function approval_document(){
+		$id = $_POST['id'];
+		$query = $this->db->query(" update tlaporan set status_doc=1 where id_tp=$id ");
+			$this->db->where('id_tp', $id);
+			$this->db->set('status_laporan',1);
+			$this->db->update('ttrans_pelatihan');
+			$this->setemail_laporan_true($id);
+		return $query;
+
+		
+	}
+
+	public function rejected_document(){
+		$id = $_POST['id'];
+		$pesan = $_POST['reason'];
+
+		
+
+
+		$query = $this->db->query(" update tlaporan set status_doc=0 where id_tp=$id ");
+		$this->db->where('id_tp', $id);
+			$this->db->set('status_laporan',0);
+			$this->db->update('ttrans_pelatihan');
+		$this->setemail_laporan($id, $pesan);
+		return $query;
+
+		
+	}
+
+	public function setemail_laporan($id,$pesan)
+			{
+			
+			// $this->load->library('FPDF');
+			// $this->load->helper('tanggal_helper');
+			 $training= $this->db->get_where('tview_trans_pelatihan', array('id_tp' => $id))->row();
+
+			// $this->load->view('pages/panel_user/print',$data);
+			$nip = $training->nip;
+			$nama= $training->nama_pegawai;
+			$pelatihan = $training->judul_course;
+			$subject='Notifikasi Verifikasi Laporan Pelatihan '.$pelatihan.'- Perumnas Training Agenda';
+			$message='Dokumen laporan pelatihan :<b>'.$training->judul_course.'</b> <br/>Atas nama :<b>'.$training->nama_pegawai.'</b><br/> di <b>tolak</b>, karena '.$pesan.' <br/><br/> Terima kasih <br/>'.'infotraining.perumnas.co.id - PeTA';
+			$name = 'Perumnas Training Agenda';
+            $from_email = 'dept.diklat@perumnas.co.id';
+           
+
+            //set to_email id to which you want to receive mails
+            $to_email = $training->email_pegawai;
+
+            //configure email settings
+           $config = array();
+            $config['useragent'] = 'CodeIgniter';
+            $config['mailpath'] = "/usr/sbin/sendmail -t -i";
+            $config['protocol'] = "mail";
+            $config['smtp_host'] = "mail.perumnas.co.id";
+            $config['smtp_port'] = "587";
+            $config['smtp_user'] = 'infotraining@perumnas.co.id';
+            $config['smtp_pass'] = 'infotraining123';
+            $config['mailtype'] = 'html';
+            $config['charset'] = 'utf-8';
+            $config['wordwrap'] = TRUE;
+            $config['newline'] = "\r\n"; //use double quotes
+            $config['crlf']    = "\n";
+            
+            $this->load->library('email');
+            $this->email->initialize($config); 
+			 //send mail
+            $this->email->from($from_email, $name);
+            $this->email->to($to_email);
+            $this->email->subject($subject);
+            $this->email->message($message);
+          
+         
+             if($this->email->send())
+                           {
+                             
+						           // echo "email terkirim" ;
+                            	
+                           }
+                           else
+                          {
+                          show_error($this->email->print_debugger());
+                           
+                          }
+			  }
+
+	public function setemail_laporan_true($id){
+			 $training= $this->db->get_where('tview_trans_pelatihan', array('id_tp' => $id))->row();
+
+			// $this->load->view('pages/panel_user/print',$data);
+			$nip = $training->nip;
+			$nama= $training->nama_pegawai;
+			$pelatihan = $training->judul_course;
+			$subject='Notifikasi Verifikasi Laporan Pelatihan '.$pelatihan.'- Perumnas Training Agenda';
+			$message='Dokumen laporan pelatihan :<b>'.$training->judul_course.'</b> <br/>Atas nama :<b>'.$training->nama_pegawai.'</b><br/> sudah <b> terverifikasi.</b> <br/><br/> Terima kasih <br/>'.'infotraining.perumnas.co.id - PeTA';
+			$name = 'Perumnas Training Agenda';
+            $from_email = 'dept.diklat@perumnas.co.id';
+           
+
+            //set to_email id to which you want to receive mails
+            $to_email = $training->email_pegawai;
+
+            //configure email settings
+           $config = array();
+            $config['useragent'] = 'CodeIgniter';
+            $config['mailpath'] = "/usr/sbin/sendmail -t -i";
+            $config['protocol'] = "mail";
+            $config['smtp_host'] = "mail.perumnas.co.id";
+            $config['smtp_port'] = "587";
+            $config['smtp_user'] = 'infotraining@perumnas.co.id';
+            $config['smtp_pass'] = 'infotraining123';
+            $config['mailtype'] = 'html';
+            $config['charset'] = 'utf-8';
+            $config['wordwrap'] = TRUE;
+            $config['newline'] = "\r\n"; //use double quotes
+            $config['crlf']    = "\n";
+            
+            $this->load->library('email');
+            $this->email->initialize($config); 
+			 //send mail
+            $this->email->from($from_email, $name);
+            $this->email->to($to_email);
+            $this->email->subject($subject);
+            $this->email->message($message);
+          
+         
+             if($this->email->send())
+                           {
+                             
+						           // echo "email terkirim" ;
+                            	
+                           }
+                           else
+                          {
+                          show_error($this->email->print_debugger());
+                           
+                          }
+	}
 
 
 	}

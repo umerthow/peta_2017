@@ -17,10 +17,7 @@ public function __construct(){
 
 
 	public function index(){
-
 	
-
-
 	$data['title']='Provider';
 	$data['page_name']= 'panel_user/index';
 
@@ -41,17 +38,43 @@ public function __construct(){
      
 
 
-		
-	$data['prov_approved'] = $this->provider_m->get_all_course_approved($data['ringkasan']);
+	$limit=2;	
+	$data['prov_approved'] = $this->provider_m->get_all_course_approved($data['ringkasan'],$limit);
 	$data['pddk_bj'] = $this->provider_m->get_all_pddk_bj();
 	$data['kategori'] = $this->provider_m->get_kategori();
 	$data['edit_user']= $this->panel_user_m->get_all_comment();
 	$this->load->view('main_layout_panel',$data);
 
 
-
 	} 
 
+	public function authentifikasi(){
+	 $username =  $_GET["user"];
+	 $password =  $_GET["pass"];
+	 $user= $this->panel_user_m->get_by_username_password_auth($username,$password);
+
+			if ($user)
+			{
+				//buiat session
+								$data_user = array(
+								'fullname' =>$user->fullname,
+								'ID_User'	=>$user->ID_User,
+								'NIP' 		=>$user->NIP,
+								'group'     =>$user->group,
+								'email'		=>$user->email,
+								'dah_login' => TRUE
+								);
+								
+				$this->session->set_userdata($data_user);
+				redirect('panel_user');
+			}
+				else
+				{
+					//pesan gagal
+					$this->session->set_flashdata('error','Username dan Password Anda Salah!');
+					redirect('panel_user');
+				}
+	}
 
 	public function calender_panel(){
 
@@ -1956,16 +1979,16 @@ public function request_new(){
 public function tambahkan(){
 	//define("MESABOT_TOKEN","Ohf3rNTudcT5SkpOh2a0caZeMX2bNHeJuCQD7HSz");
 	//$this->load->library('Mesabot');
+	date_default_timezone_set('Asia/Jakarta');      //Don't forget this..I had used this..just didn't mention it in the post
 
+		$datetime_variable = new DateTime();
+		$datetime_formatted = date_format($datetime_variable, 'Y-m-d H:i:s');
 	if($this->input->post('nama_persh')==''){
 		$data['title']='Provider';
 		$data['page_name']= 'panel_user/request_new_finish';
 		$this->form_validation->set_rules('judul','judul_course','required');
 		$this->form_validation->set_rules('kategori','nama_kategori','required');
-		date_default_timezone_set('Asia/Jakarta');      //Don't forget this..I had used this..just didn't mention it in the post
-
-		$datetime_variable = new DateTime();
-		$datetime_formatted = date_format($datetime_variable, 'Y-m-d H:i:s');
+		
 		if($this->form_validation->run() == FALSE ){
 
 		 
