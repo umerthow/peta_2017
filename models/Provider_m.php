@@ -333,20 +333,85 @@ public function get_request_karyawan(){
 		
 	}
 
-		public function get_all_course_all(){
-		
-		$this->db->select('*');
+	var $table_a ='tpelatihan';
+	var $column_order_a = array(null,'judul_course','nama_provider','nama_kategori','waktu_in','waktu_out','kota_course','status');
+	var $column_search_a = array('judul_course','kota_course','nama_provider');
+	var $order_a = array('id_course' => 'asc');
+	
+	public function query_training(){
+		$this->db->select('id_course, judul_course,nama_provider,nama_kategori,waktu_in,waktu_out,kota_course,status');
 		$this->db->from('tpelatihan');
 		$this->db->join('tref_kategori','tref_kategori.id_kategori = tpelatihan.id_kategori');
 		$this->db->join('tprovider','tprovider.id_provider = tpelatihan.id_provider');
 		
-		$this->db->order_by('tpelatihan.judul_course','DESC');
-		return $this->db->get_where()->result();
+	}
+
+
+	private function get_all_course_query(){
+	
+		$this->query_training();
+ 
+        $i = 0;
+
+        foreach ($this->column_search_a as $item) {
+        	if($_POST['search']['value']) {
+
+        		if($i===0) {
+        			$this->db->group_start();
+        			$this->db->like($item, $_POST['search']['value']);
+        		} else {
+
+        			$this->db->or_like($item, $_POST['search']['value']);
+        		}
+
+        		if (count($this->column_search_a) - 1 == $i)
+        			$this->db->group_end();
+
+        	} $i++;
+
+
+        }
+
+        if(isset($_POST['order'])) // here order processing
+        {
+            $this->db->order_by($this->column_order_a[$_POST['order']['0']['column']], $_POST['order']['0']['dir']);
+        } 
+
+        else if(isset($this->order_a))
+        {
+            $order = $this->order_a;
+            $this->db->order_by(key($order), $order[key($order)]);
+        }
+	}
+
+	public function get_all_course_all(){
+
+		$this->get_all_course_query();
+        if($_POST['length'] != -1)
+        $this->db->limit($_POST['length'], $_POST['start']);
+        $query = $this->db->get();
+        return $query->result();
 		
 		//return $this->db->limit($limit,$offset)->get_where('project_umar_stokbuku');
 	
 		
 	}
+
+	public function count_filtered()
+    {
+        $this->get_all_course_query();
+        $query = $this->db->get();
+        return $query->num_rows();
+    }
+
+    public function count_all()
+    {
+         $this->db->from($this->table_a);
+        return $this->db->count_all_results();
+    }
+
+
+
 
 
 

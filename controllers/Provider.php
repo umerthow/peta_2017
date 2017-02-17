@@ -708,12 +708,59 @@ class Provider extends CI_Controller{
 
 		//pagging
 		
-		$data['prov'] = $this->provider_m->get_all_course_all();
+		//$data['prov'] = $this->provider_m->get_all_course_all();
+
+		
 
 
 
 	    $this->load->view('main_layout',$data);
 
+
+	}
+
+	public function pelatihan_all_ajax(){
+		$list = $this->provider_m->get_all_course_all();
+		$data = array();
+		$no = $_POST['start'];
+
+		foreach ($list as $pelatihan) {
+            $no++;
+            $row = array();
+            $row[] = $no;
+            $row[] = $pelatihan->judul_course;
+            $row[] = $pelatihan->nama_provider;
+            $row[] = $pelatihan->nama_kategori;
+   			$row[] = tgl_indo($pelatihan->waktu_in);
+            $row[] = tgl_indo($pelatihan->waktu_out);
+ 			$row[] = $pelatihan->kota_course;
+
+ 			//add html for action
+ 			 if($pelatihan->status == 0) {
+
+ 				$row[] ='<span class="label label-default">Pending</span>';
+ 			} else if ($pelatihan->status == 3) {
+
+ 			$row[] =	'<span class="label label-success">Approved</span>';
+
+ 			} else if ($pelatihan->status == 4) {
+
+ 				$row[] = '<span class="label label-danger">Rejected</span>';
+ 			};        
+
+            
+            $data[] = $row;
+        }
+
+        $output = array(
+                        "draw" => $_POST['draw'],
+                        "recordsTotal" => $this->provider_m->count_all(),
+                        "recordsFiltered" => $this->provider_m->count_filtered(),
+                        "data" => $data,
+                );
+
+
+        echo json_encode($output);
 
 	}
 
